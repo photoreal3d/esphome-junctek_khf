@@ -52,8 +52,10 @@ JuncTekKGF::JuncTekKGF(unsigned address, bool invert_current)
 void JuncTekKGF::dump_config()
 {
   ESP_LOGCONFIG(TAG, "junctek_kgf:");
-  ESP_LOGCONFIG(TAG, "  address: %d", this->address_);
-  ESP_LOGCONFIG(TAG, "  invert_current: %s", this->invert_current_ ? "True" : "False");
+  ESP_LOGCONFIG(TAG, "  Address: %d", this->address_);
+  ESP_LOGCONFIG(TAG, "  Invert Current: %s", this->invert_current_ ? "True" : "False");
+  ESP_LOGCONFIG(TAG, "  Update Settings Interval: %d", this->update_settings_interval_);
+  ESP_LOGCONFIG(TAG, "  Update Stats Interval: %d", this->update_stats_interval_);
 }
 
 void JuncTekKGF::handle_settings(const char* buffer)
