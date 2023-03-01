@@ -44,6 +44,8 @@ TYPES = [
 ]
 
 CONF_INVERT_CURRENT="invert_current"
+CONF_UPDATE_SETTINGS_INTERVAL="update_settings_interval"
+CONF_UPDATE_STATS_INTERVAL="update_stats_interval"
 
 JuncTekKGF = cg.global_ns.class_(
     "JuncTekKGF", cg.Component, uart.UARTDevice
@@ -82,7 +84,9 @@ CONFIG_SCHEMA = cv.All(
                 device_class=DEVICE_CLASS_TEMPERATURE,
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
-            cv.Optional(CONF_INVERT_CURRENT, default=False): cv.boolean, 
+            cv.Optional(CONF_INVERT_CURRENT, default=False): cv.boolean,
+            cv.Optional(CONF_UPDATE_SETTINGS_INTERVAL, default=30000): cv.int_,
+            cv.Optional(CONF_UPDATE_STATS_INTERVAL, default=1000): cv.int_,
         }
     ).extend(uart.UART_DEVICE_SCHEMA)
     )
@@ -100,3 +104,6 @@ async def to_code(config):
     await uart.register_uart_device(var, config)
     for key in TYPES:
         await setup_conf(config, key, var)
+
+    cg.add(var.set_update_settings_interval(config[CONF_UPDATE_SETTINGS_INTERVAL]))
+    cg.add(var.set_update_stats_interval(config[CONF_UPDATE_STATS_INTERVAL]))

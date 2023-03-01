@@ -190,7 +190,7 @@ void JuncTekKGF::loop()
 {
   const unsigned long start_time = millis();
 
-  if (!this->last_settings_ || (*this->last_settings_ + (30 * 1000)) < start_time)
+  if (!this->last_settings_ || (*this->last_settings_ + this->update_settings_interval_) < start_time)
   {
     this->last_settings_ = start_time;
     char buffer[20];
@@ -198,7 +198,7 @@ void JuncTekKGF::loop()
     write_str(buffer);
   }
 
-  if (!this->last_stats_ || (*this->last_stats_ + (10 * 1000)) < start_time)
+  if (!this->last_stats_ || (*this->last_stats_ + this->update_stats_interval_) < start_time)
   {
     this->last_stats_ = start_time;
     char buffer[20];
