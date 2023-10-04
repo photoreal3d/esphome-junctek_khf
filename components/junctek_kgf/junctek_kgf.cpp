@@ -52,8 +52,10 @@ JuncTekKGF::JuncTekKGF(unsigned address, bool invert_current)
 void JuncTekKGF::dump_config()
 {
   ESP_LOGCONFIG(TAG, "junctek_kgf:");
-  ESP_LOGCONFIG(TAG, "  address: %d", this->address_);
-  ESP_LOGCONFIG(TAG, "  invert_current: %s", this->invert_current_ ? "True" : "False");
+  ESP_LOGCONFIG(TAG, "  Address: %d", this->address_);
+  ESP_LOGCONFIG(TAG, "  Invert Current: %s", this->invert_current_ ? "True" : "False");
+  ESP_LOGCONFIG(TAG, "  Update Settings Interval: %d", this->update_settings_interval_);
+  ESP_LOGCONFIG(TAG, "  Update Stats Interval: %d", this->update_stats_interval_);
 }
 
 void JuncTekKGF::handle_settings(const char* buffer)
@@ -190,7 +192,7 @@ void JuncTekKGF::loop()
 {
   const unsigned long start_time = esphome::millis();
 
-  if (!this->last_settings_ || (*this->last_settings_ + (30 * 1000)) < start_time)
+  if (!this->last_settings_ || (*this->last_settings_ + this->update_settings_interval_) < start_time)
   {
     this->last_settings_ = start_time;
     char buffer[20];
@@ -198,7 +200,7 @@ void JuncTekKGF::loop()
     write_str(buffer);
   }
 
-  if (!this->last_stats_ || (*this->last_stats_ + (10 * 1000)) < start_time)
+  if (!this->last_stats_ || (*this->last_stats_ + this->update_stats_interval_) < start_time)
   {
     this->last_stats_ = start_time;
     char buffer[20];

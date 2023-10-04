@@ -16,8 +16,10 @@ public:
   void set_voltage_sensor(sensor::Sensor *voltage_sensor) { voltage_sensor_ = voltage_sensor; }
   void set_current_sensor(sensor::Sensor *current_sensor) { current_sensor_ = current_sensor; }
   void set_temperature_sensor(sensor::Sensor *temperature) { temperature_ = temperature; }
-
   void set_battery_level_sensor(sensor::Sensor *battery_level_sensor) { battery_level_sensor_ = battery_level_sensor; }
+  void set_update_settings_interval(uint32_t interval) { update_settings_interval_ = interval; }
+  void set_update_stats_interval(uint32_t interval) { update_stats_interval_ = interval; }
+
   void dump_config() override;
   void loop() override;
 
@@ -33,6 +35,8 @@ protected:
   bool verify_checksum(int checksum, const char* buffer);
 
   const unsigned address_;
+  uint32_t update_settings_interval_ = 30000;
+  uint32_t update_stats_interval_ = 1000;
 
   sensor::Sensor* voltage_sensor_{nullptr};
   sensor::Sensor* current_sensor_{nullptr};
