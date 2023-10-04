@@ -7,6 +7,7 @@ Connects to the Junctek KGF series battery monitor via UART (RS-485 adapter need
 * Battery Percent
 * Current Amps
 * Temperature
+* ...
 
 ## Requirements
 * ESPHome
@@ -16,7 +17,8 @@ Tested on ESP32 using a RS-485 uart into a Junctek KG110F, but should work on an
 
 ## Usage
 ### Connect hardware.
-The ESP32 needs to be connected via an RS-485 module to the RS-485 on the monitor using a 4cp4 connector.
+The ESP32 needs to be connected via an RS-485 module (https://www.aliexpress.com/item/1005001621746811.html) to the RS-485 on the monitor using a 4p4c (RJ9/RJ10) connector.
+The ESP32 should be on the same ground as Junctek, or the RS-485 module should be opto-isolated (https://www.aliexpress.com/item/1005004192837276.html).
 
 ## ESPHOME Config
 The applicable config for the device should look something like:
@@ -26,6 +28,7 @@ external_components:
   - source: github://tfyoung/esphome-junctek_kgf
 
 uart:
+#  connected to Tx on RS-485 module
   tx_pin: 26
   rx_pin: 27
   baud_rate: 115200
@@ -40,8 +43,16 @@ sensor:
       name: "Battery Current"
     battery_level:
       name: "Battery Level"
+    amp_hour_remain:
+      name: "Ah Remaining"
+    kilo_watt_hour_remain:
+      name: "kWh Remaining"
     temperature:
-      name: "Battery Temperature"
+      name: "Ambient Temperature"
+    battery_ohm:
+      name: "Battery Resistance"
+    relay_status:
+      name: "Relay Status"
 ```
 
 Not all sensors need to be added.

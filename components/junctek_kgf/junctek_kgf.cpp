@@ -119,19 +119,46 @@ void JuncTekKGF::handle_status(const char* buffer)
   const int batteryLifeMinutes = getval(cursor);
   const float batteryInternalOhms = getval(cursor) / 100.0;
   ESP_LOGV("JunkTekKGF", "Recv %f %f %d %f %f %f", voltage, ampHourRemaining, direction, powerInWatts, amps, temperature);
+
   if (voltage_sensor_)
     this->voltage_sensor_->publish_state(voltage);
+
   if (battery_level_sensor_ && this->battery_capacity_)
     this->battery_level_sensor_->publish_state(ampHourRemaining * 100.0 / *this->battery_capacity_);
-  if (current_sensor_)
-  {
+
+  if (current_sensor_) {
     float adjustedCurrent = direction == 0 ? amps : -amps;
     if (invert_current_)
       adjustedCurrent *= -1;
     current_sensor_->publish_state(adjustedCurrent);
   }
+
+  if (current_direction_sensor_)
+    this->current_direction_sensor_->publish_state(direction == 0);
+
+  if (battery_ohm_sensor_)
+    this->battery_ohm_sensor_->publish_state(batteryInternalOhms);
+
+  if (amp_hour_remain_sensor_)
+    this->amp_hour_remain_sensor_->publish_state(ampHourRemaining);
+
+  if (kilo_watt_hour_remain_sensor_)
+    this->kilo_watt_hour_remain_sensor_->publish_state(wattHourRemaining / 1000);
+
+  if (relay_status_sensor_)
+    this->relay_status_sensor_->publish_state(relayStatus == 0);
+
   if (temperature_)
     this->temperature_->publish_state(temperature);
+
+    //  if (power_sensor_)
+    //    this->power_sensor_->publish_state(powerInWatts);
+
+    //  if (battery_life_sensor_)
+    //    this->battery_life_sensor_->publish_state(batteryLifeMinutes);
+
+  //  if (runtime_sensor_)
+  //    this->runtime_sensor_->publish_state(runtimeSeconds);
 
   this->last_stats_ = esphome::millis();
 }
@@ -139,16 +166,23 @@ void JuncTekKGF::handle_status(const char* buffer)
 void JuncTekKGF::handle_line()
 {
   //A failure in parsing will return back to here with a non-zero value
-  if (setjmp(parsing_failed))
+  if (setjmp(parsing_failed)){
+    ESP_LOGE("JunkTekKGF", "parsing_failed");
     return;
-  
+  }
+
   const char* buffer = &this->line_buffer_[0];
-  if (buffer[0] != ':' || buffer[1] != 'r')
+
+  if (buffer[0] != ':' || buffer[1] != 'r') {
     return;
+  }
+
   if (strncmp(&buffer[2], "50=", 3) == 0)
     handle_status(&buffer[5]);
   else if (strncmp(&buffer[2], "51=", 3) == 0)
     handle_settings(&buffer[5]);
+  else
+    ESP_LOGD("JunkTekKGF", "buffer:", buffer);
 
   return;
 }
@@ -159,9 +193,9 @@ bool JuncTekKGF::readline()
     const char readch = read();
     if (readch > 0) {
       switch (readch) {
-        case '\n': // Ignore new-lines
+        case '\r': // Ignore carriage return
           break;
-        case '\r': // Return on CR
+        case '\n': // Return on line feed
           this->line_pos_ = 0;  // Reset position index ready for next time
           return true;
         default:

@@ -12,35 +12,68 @@ from esphome.const import (
     CONF_VOLTAGE,
     CONF_CURRENT,
     CONF_BATTERY_LEVEL,
-    
+    CONF_DIRECTION,
+
     DEVICE_CLASS_VOLTAGE,
     STATE_CLASS_MEASUREMENT,
+    STATE_CLASS_TOTAL_INCREASING,
     UNIT_VOLT,
     UNIT_CELSIUS,
     UNIT_AMPERE,
+    UNIT_WATT,
+    UNIT_OHM,
     CONF_UPDATE_INTERVAL,
     UNIT_EMPTY,
     UNIT_PERCENT,
     ICON_EMPTY,
+    UNIT_KILOWATT_HOURS,
+    UNIT_MINUTE,
+    ICON_EMPTY,
+    ICON_POWER,
+    ICON_BATTERY,
     ICON_THERMOMETER,
     ICON_FLASH,
     ICON_PERCENT,
+    ICON_TIMER,
+    ICON_POWER,
     DEVICE_CLASS_CURRENT,
     DEVICE_CLASS_BATTERY,
     DEVICE_CLASS_TEMPERATURE,
+    DEVICE_CLASS_SWITCH,
+    DEVICE_CLASS_POWER,
+    DEVICE_CLASS_ENERGY,
+    DEVICE_CLASS_DURATION,
+    DEVICE_CLASS_BATTERY_CHARGING,
 )
 
+UNIT_AMPER_HOURS = 'Ah'
 
 
 DEPENDENCIES = ["uart"]
 
 AUTO_LOAD = ["sensor"]
 
+# sensors
+CONF_CURRENT_DIRECTION="current_direction"
+CONF_BATTERY_OHM="battery_ohm"
+CONF_KILO_WATT_HOUR_REMAIN = 'kilo_watt_hour_remain'
+CONF_BATTERY_LIFE = 'battery_life'
+CONF_BATTERY_POWER = 'battery_power'
+CONF_AMP_HOUR_REMAIN = "amp_hour_remain"
+CONF_RELAY_STATUS = "relay_status"
+
 TYPES = [
     CONF_VOLTAGE,
     CONF_CURRENT,
     CONF_BATTERY_LEVEL,
     CONF_TEMPERATURE,
+    CONF_DIRECTION,
+    CONF_BATTERY_POWER,
+    CONF_BATTERY_LIFE,
+    CONF_KILO_WATT_HOUR_REMAIN,
+    CONF_AMP_HOUR_REMAIN,
+    CONF_BATTERY_OHM,
+    CONF_RELAY_STATUS
 ]
 
 CONF_INVERT_CURRENT="invert_current"
@@ -77,6 +110,13 @@ CONFIG_SCHEMA = cv.All(
                 device_class=DEVICE_CLASS_BATTERY,
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
+            cv.Optional(CONF_BATTERY_OHM): sensor.sensor_schema(
+                unit_of_measurement=UNIT_OHM,
+                icon="mdi:resistor",
+                accuracy_decimals=2,
+                device_class=DEVICE_CLASS_BATTERY,
+                state_class=STATE_CLASS_MEASUREMENT,
+            ),
              cv.Optional(CONF_TEMPERATURE): sensor.sensor_schema(
                 unit_of_measurement=UNIT_CELSIUS,
                 icon=ICON_THERMOMETER,
@@ -84,9 +124,43 @@ CONFIG_SCHEMA = cv.All(
                 device_class=DEVICE_CLASS_TEMPERATURE,
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
+            cv.Optional(CONF_DIRECTION): sensor.sensor_schema(
+                accuracy_decimals=0,
+            ),
+            cv.Optional(CONF_RELAY_STATUS): sensor.sensor_schema(
+            ),
+            # cv.Optional(CONF_POWER): sensor.sensor_schema(
+            #     unit_of_measurement=UNIT_WATT,
+            #     icon=ICON_POWER,
+            #     accuracy_decimals=1,
+            #     device_class=DEVICE_CLASS_POWER,
+            #     state_class=STATE_CLASS_MEASUREMENT,
+            # ),
+            # cv.Optional(CONF_BATTERY_LIFE): sensor.sensor_schema(
+            #     unit_of_measurement=UNIT_MINUTE,
+            #     icon=ICON_TIMER,
+            #     accuracy_decimals=2,
+            #     device_class=DEVICE_CLASS_DURATION,
+            #     state_class=STATE_CLASS_MEASUREMENT,
+            # ),
+            cv.Optional(CONF_KILO_WATT_HOUR_REMAIN): sensor.sensor_schema(
+                unit_of_measurement=UNIT_KILOWATT_HOURS,
+                icon=ICON_BATTERY,
+                accuracy_decimals=0,
+                device_class=DEVICE_CLASS_BATTERY,
+                state_class=STATE_CLASS_MEASUREMENT,
+            ),
+            cv.Optional(CONF_AMP_HOUR_REMAIN): sensor.sensor_schema(
+                unit_of_measurement=UNIT_AMPER_HOURS,
+                icon=ICON_BATTERY,
+                accuracy_decimals=0,
+                device_class=DEVICE_CLASS_BATTERY,
+                state_class=STATE_CLASS_MEASUREMENT,
+            ),
             cv.Optional(CONF_INVERT_CURRENT, default=False): cv.boolean,
             cv.Optional(CONF_UPDATE_SETTINGS_INTERVAL, default=30000): cv.int_,
             cv.Optional(CONF_UPDATE_STATS_INTERVAL, default=1000): cv.int_,
+            cv.Optional(CONF_CURRENT_DIRECTION, default=True): cv.boolean,
         }
     ).extend(uart.UART_DEVICE_SCHEMA)
     )
