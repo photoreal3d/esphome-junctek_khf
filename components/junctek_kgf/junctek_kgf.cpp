@@ -113,6 +113,7 @@ void JuncTekKGF::handle_status(const char* buffer)
   const float wattHourRemaining = getval(cursor) / 100.0;
   const float runtimeSeconds = getval(cursor);
   const float temperature = getval(cursor) - 100.0;
+//todo - my unit always returns 0; from manual: 0 means the function is pending
   const float powerInWatts = getval(cursor) / 100.0;
   const int relayStatus = getval(cursor);
   const int direction = getval(cursor);
@@ -151,10 +152,14 @@ void JuncTekKGF::handle_status(const char* buffer)
   if (temperature_)
     this->temperature_->publish_state(temperature);
 
-    //  if (power_sensor_)
-    //    this->power_sensor_->publish_state(powerInWatts);
+  if (power_sensor_) {
+    float watts = voltage * amps;
+    if (invert_current_)
+      watts *= -1;
+    this->power_sensor_->publish_state(watts);
+  }
 
-    //  if (battery_life_sensor_)
+  //  if (battery_life_sensor_)
     //    this->battery_life_sensor_->publish_state(batteryLifeMinutes);
 
   //  if (runtime_sensor_)
@@ -224,7 +229,8 @@ bool JuncTekKGF::verify_checksum(int checksum, const char* buffer)
 
 void JuncTekKGF::loop()
 {
-// not needed. uncomment if you do not receive any data
+//todo not needed. uncomment if you do not receive any data
+
 //  const unsigned long start_time = esphome::millis();
 //
 //  if (!this->last_settings_ || (*this->last_settings_ + this->update_settings_interval_) < start_time)

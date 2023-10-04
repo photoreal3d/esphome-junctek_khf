@@ -61,6 +61,7 @@ CONF_BATTERY_LIFE = 'battery_life'
 CONF_BATTERY_POWER = 'battery_power'
 CONF_AMP_HOUR_REMAIN = "amp_hour_remain"
 CONF_RELAY_STATUS = "relay_status"
+CONF_POWER = "power"
 
 TYPES = [
     CONF_VOLTAGE,
@@ -73,7 +74,8 @@ TYPES = [
     CONF_KILO_WATT_HOUR_REMAIN,
     CONF_AMP_HOUR_REMAIN,
     CONF_BATTERY_OHM,
-    CONF_RELAY_STATUS
+    CONF_RELAY_STATUS,
+    CONF_POWER
 ]
 
 CONF_INVERT_CURRENT="invert_current"
@@ -129,13 +131,13 @@ CONFIG_SCHEMA = cv.All(
             ),
             cv.Optional(CONF_RELAY_STATUS): sensor.sensor_schema(
             ),
-            # cv.Optional(CONF_POWER): sensor.sensor_schema(
-            #     unit_of_measurement=UNIT_WATT,
-            #     icon=ICON_POWER,
-            #     accuracy_decimals=1,
-            #     device_class=DEVICE_CLASS_POWER,
-            #     state_class=STATE_CLASS_MEASUREMENT,
-            # ),
+            cv.Optional(CONF_POWER): sensor.sensor_schema(
+                unit_of_measurement=UNIT_WATT,
+                icon=ICON_POWER,
+                accuracy_decimals=0,
+                device_class=DEVICE_CLASS_POWER,
+                state_class=STATE_CLASS_MEASUREMENT,
+            ),
             # cv.Optional(CONF_BATTERY_LIFE): sensor.sensor_schema(
             #     unit_of_measurement=UNIT_MINUTE,
             #     icon=ICON_TIMER,

@@ -41,6 +41,8 @@ sensor:
       name: "Battery Voltage"
     current:
       name: "Battery Current"
+    power:
+      name: "Power"
     battery_level:
       name: "Battery Level"
     amp_hour_remain:
