@@ -56,7 +56,8 @@ AUTO_LOAD = ["sensor"]
 # sensors
 CONF_CURRENT_DIRECTION="current_direction"
 CONF_BATTERY_OHM="battery_ohm"
-CONF_KILO_WATT_HOUR_REMAIN = 'kilo_watt_hour_remain'
+CONF_BATTERY_CHARGED_ENERGY = 'battery_charged_energy'
+CONF_BATTERY_DISCHARGED_ENERGY = 'battery_discharged_energy'
 CONF_BATTERY_LIFE = 'battery_life'
 CONF_BATTERY_POWER = 'battery_power'
 CONF_AMP_HOUR_REMAIN = "amp_hour_remain"
@@ -71,7 +72,8 @@ TYPES = [
     CONF_DIRECTION,
     CONF_BATTERY_POWER,
     CONF_BATTERY_LIFE,
-    CONF_KILO_WATT_HOUR_REMAIN,
+    CONF_BATTERY_CHARGED_ENERGY,
+    CONF_BATTERY_DISCHARGED_ENERGY,
     CONF_AMP_HOUR_REMAIN,
     CONF_BATTERY_OHM,
     CONF_RELAY_STATUS,
@@ -145,11 +147,18 @@ CONFIG_SCHEMA = cv.All(
             #     device_class=DEVICE_CLASS_DURATION,
             #     state_class=STATE_CLASS_MEASUREMENT,
             # ),
-            cv.Optional(CONF_KILO_WATT_HOUR_REMAIN): sensor.sensor_schema(
+            cv.Optional(CONF_BATTERY_CHARGED_ENERGY): sensor.sensor_schema(
                 unit_of_measurement=UNIT_KILOWATT_HOURS,
-                icon=ICON_BATTERY,
+                icon="mdi:lightning-bolt",
                 accuracy_decimals=0,
-                device_class=DEVICE_CLASS_BATTERY,
+                device_class=DEVICE_CLASS_ENERGY,
+                state_class=STATE_CLASS_MEASUREMENT,
+            ),
+            cv.Optional(CONF_BATTERY_DISCHARGED_ENERGY): sensor.sensor_schema(
+                unit_of_measurement=UNIT_KILOWATT_HOURS,
+                icon="mdi:lightning-bolt",
+                accuracy_decimals=0,
+                device_class=DEVICE_CLASS_ENERGY,
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
             cv.Optional(CONF_AMP_HOUR_REMAIN): sensor.sensor_schema(

@@ -25,7 +25,9 @@ public:
 
   void set_battery_level_sensor(sensor::Sensor *battery_level_sensor) { battery_level_sensor_ = battery_level_sensor; }
   void set_amp_hour_remain_sensor(sensor::Sensor *amp_hour_remain_sensor) { amp_hour_remain_sensor_ = amp_hour_remain_sensor; }
-  void set_kilo_watt_hour_remain_sensor(sensor::Sensor *kilo_watt_hour_remain_sensor) { kilo_watt_hour_remain_sensor_ = kilo_watt_hour_remain_sensor; }
+
+  void set_battery_charged_energy_sensor(sensor::Sensor *battery_charged_energy_sensor) { battery_charged_energy_sensor_ = battery_charged_energy_sensor; }
+  void set_battery_discharged_energy_sensor(sensor::Sensor *battery_discharged_energy_sensor) { battery_discharged_energy_sensor_ = battery_discharged_energy_sensor; }
 
   void set_relay_status_sensor(sensor::Sensor *relay_status_sensor) { relay_status_sensor_ = relay_status_sensor; }
 
@@ -60,7 +62,9 @@ protected:
 
   sensor::Sensor* battery_level_sensor_{nullptr};
   sensor::Sensor* amp_hour_remain_sensor_{nullptr};
-  sensor::Sensor* kilo_watt_hour_remain_sensor_{nullptr};
+
+  sensor::Sensor* battery_charged_energy_sensor_{nullptr};
+  sensor::Sensor* battery_discharged_energy_sensor_{nullptr};
 
   sensor::Sensor* relay_status_sensor_{nullptr};
 

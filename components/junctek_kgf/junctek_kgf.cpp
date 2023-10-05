@@ -110,7 +110,7 @@ void JuncTekKGF::handle_status(const char* buffer)
   const float amps = getval(cursor) / 100.0;
   const float ampHourRemaining = getval(cursor) / 1000.0;
   const float ampHourTotalUsed = getval(cursor) / 100.00;
-  const float wattHourRemaining = getval(cursor) / 100.0;
+  const float wattHour = getval(cursor) / 100.0;
   const float runtimeSeconds = getval(cursor);
   const float temperature = getval(cursor) - 100.0;
 //todo - my unit always returns 0; from manual: 0 means the function is pending
@@ -143,9 +143,6 @@ void JuncTekKGF::handle_status(const char* buffer)
   if (amp_hour_remain_sensor_)
     this->amp_hour_remain_sensor_->publish_state(ampHourRemaining);
 
-  if (kilo_watt_hour_remain_sensor_)
-    this->kilo_watt_hour_remain_sensor_->publish_state(wattHourRemaining / 1000);
-
   if (relay_status_sensor_)
     this->relay_status_sensor_->publish_state(relayStatus == 0);
 
@@ -153,12 +150,21 @@ void JuncTekKGF::handle_status(const char* buffer)
     this->temperature_->publish_state(temperature);
 
   if (power_sensor_) {
-    float watts = voltage * amps;
+    float adjustedCurrent = direction == 0 ? amps : -amps;
     if (invert_current_)
-      watts *= -1;
+      adjustedCurrent *= -1;
+    float watts = voltage * adjustedCurrent;
     this->power_sensor_->publish_state(watts);
   }
 
+  if (battery_charged_energy_sensor_) {
+    this->battery_charged_energy_sensor_->publish_state(wattHour / 1000);
+  }
+
+  if (battery_discharged_energy_sensor_) {
+    float dischargedEnergy = ampHourTotalUsed * (3.2 * 18) / 1000;  // Nominal voltange on cell * count off cell;
+    this->battery_discharged_energy_sensor_->publish_state(dischargedEnergy);
+  }
   //  if (battery_life_sensor_)
     //    this->battery_life_sensor_->publish_state(batteryLifeMinutes);
 

@@ -47,8 +47,10 @@ sensor:
       name: "Battery Level"
     amp_hour_remain:
       name: "Ah Remaining"
-    kilo_watt_hour_remain:
-      name: "kWh Remaining"
+    battery_charged_energy:
+      name: "kWh Charged Total"
+    battery_discharged_energy:
+      name: "kWh Discharged Total"
     temperature:
       name: "Ambient Temperature"
     battery_ohm:
