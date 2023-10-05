@@ -47,16 +47,16 @@ sensor:
       name: "Battery Level"
     amp_hour_remain:
       name: "Ah Remaining"
-    battery_charged_energy:
-      name: "kWh Charged Total"
-    battery_discharged_energy:
-      name: "kWh Discharged Total"
     temperature:
       name: "Ambient Temperature"
     battery_ohm:
       name: "Battery Resistance"
     relay_status:
       name: "Relay Status"
+    battery_charged_energy:
+      name: "kWh Charged Total"
+    battery_discharged_energy:
+      name: "kWh Discharged Total"
 ```
 
 Not all sensors need to be added.
