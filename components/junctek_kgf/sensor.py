@@ -150,14 +150,14 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_BATTERY_CHARGED_ENERGY): sensor.sensor_schema(
                 unit_of_measurement=UNIT_KILOWATT_HOURS,
                 icon="mdi:lightning-bolt",
-                accuracy_decimals=0,
+                accuracy_decimals=2,
                 device_class=DEVICE_CLASS_ENERGY,
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
             cv.Optional(CONF_BATTERY_DISCHARGED_ENERGY): sensor.sensor_schema(
                 unit_of_measurement=UNIT_KILOWATT_HOURS,
                 icon="mdi:lightning-bolt",
-                accuracy_decimals=0,
+                accuracy_decimals=2,
                 device_class=DEVICE_CLASS_ENERGY,
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
