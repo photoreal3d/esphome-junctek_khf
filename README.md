@@ -18,7 +18,7 @@ Tested on ESP32 using a RS-485 uart into a Junctek KG110F, but should work on an
 ## Usage
 ### Connect hardware.
 The ESP32 needs to be connected via an RS-485 module (https://www.aliexpress.com/item/1005001621746811.html) to the RS-485 on the monitor using a 4p4c (RJ9/RJ10) connector.
-The ESP32 should be on the same ground as Junctek, or the RS-485 module should be opto-isolated (https://www.aliexpress.com/item/1005004192837276.html).
+The ESP32 should be on the same ground as Junctek, or the RS-485 module should be opto-isolated (https://www.aliexpress.com/w/wholesale-ttl-to-rs485-isolated.html).
 
 ## ESPHOME Config
 The applicable config for the device should look something like:
