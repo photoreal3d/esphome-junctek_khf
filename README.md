@@ -2,65 +2,113 @@
 Component for esphome to read status from a Junctek KG-F coulometer/battery monitor via UART
 
 ## Features
-Connects to the Junctek KGF series battery monitor via UART (RS-485 adapter needed) and retrieves the following values:
+Connects to the Junctek KGF series battery monitor via UART (RS-485 *adapter NOT needed*) and retrieves the following values:
+
 * Battery Voltage
 * Battery Percent
-* Current Amps
+* Battery Current
+* Power
 * Temperature
-* ...
+* Battery Ah Charged Total
+* Battery Ah Remaining
+* Battery Ah Used Total
+* Battery Charging Power
+* Battery Discharging Power
+* Battery life remaining
+* Battery Resistance
+* Output Status
 
 ## Requirements
 * ESPHome
 
-## Tested setup
-Tested on ESP32 using a RS-485 uart into a Junctek KG110F, but should work on an ESP8266 and any of the KG-F series
+## Known problems
+* If could call it a problem - when data not available from Junctek interface - you keep seeing the latest value in sensors. Which may misslead. Sensors will not be updated nor they be set to Unavailable.
 
 ## Usage
 ### Connect hardware.
-The ESP32 needs to be connected via an RS-485 module (https://www.aliexpress.com/item/1005001621746811.html) to the RS-485 on the monitor using a 4p4c (RJ9/RJ10) connector.
-The ESP32 should be on the same ground as Junctek, or the RS-485 module should be opto-isolated (https://www.aliexpress.com/w/wholesale-ttl-to-rs485-isolated.html).
+The ESP32 TX and RX needs to be connected via Junctek LINE port using a 4cp4 connector. Monitor SHOULD BE connected too and active. If you dont have monitor you should edit component loop method and uncomment old code, and comment out new one. Monitor makes calls to Junctek asking for data, ESP32 just reads the response and parses it. So you keep the monitor + will have data comming to your IoT system.
 
 ## ESPHOME Config
 The applicable config for the device should look something like:
 
 ```yaml
+substitutions:
+  name: "shunt"
+  friendly_name: Shunt
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
 external_components:
-  - source: github://tfyoung/esphome-junctek_kgf
+  - source:
+      type: git
+      url: https://github.com/Tommixoft/esphome-junctek_kgf
+      ref: main
+    components: [ junctek_kgf ]
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
 
 uart:
-#  connected to Tx on RS-485 module
-  tx_pin: 26
-  rx_pin: 27
+  tx_pin: TX #26
+  rx_pin: RX #27
   baud_rate: 115200
+
 
 sensor:
   - platform: junctek_kgf
     address: 1
     invert_current: true
+    update_stats_interval: 3000 #3 seconds
     voltage:
       name: "Battery Voltage"
     current:
       name: "Battery Current"
     power:
-      name: "Power"
+      name: "Battery Power"
     battery_level:
       name: "Battery Level"
     amp_hour_remain:
-      name: "Ah Remaining"
+      name: "Battery Ah Remaining"
+    amp_hour_used_total:
+      name: "Battery Ah Used Total"
+    amp_hour_charged_total:
+      name: "Battery Ah Charged Total"            
     temperature:
-      name: "Ambient Temperature"
+      name: "Temperature"
+
+    # usless sensor, unless you use lead-acid battery.  But i never tested is it really measures resistance or not.
+    # In case of LiFePo4 it always returns 1mOhm which seems to be corret cause LiFePo4 resistance is less that 1mOhm.
     battery_ohm:
       name: "Battery Resistance"
-    relay_status:
-      name: "Relay Status"
+    
+    # 0 = ON, 1 = OVP, 2 = OCP, 3 = UVP/LVP, 5 = OPP, 6 = OTP, 7 = UTP??, 99 = OFF (relay is off, if you connected it to Junctek device)
+    # i think if there is multiple problems code can be combined. Lets say 7 = OVP + OTP.. but im not sure is this really the case, manual sucks.
+    output_status:
+      name: "Output Status"
+
+    # Shows how much time left at current discharge rate to go to 0%, or how much time left to go to 100% in case of charge. 
+    battery_life:
+      name: "Battery life remaining"
+
+    # It just multiply of amps and voltage in case of charging. With this you HA you can add custom sensor to calculate Kwh and integrate into ENERGY dashboard.   
     battery_charged_energy:
-      name: "kWh Charged Total"
+      name: "Battery Charging Power"
+
+    #  It just multiply of amps and voltage in case of discharging. With this you HA you can add custom sensor to calculate Kwh and integrate into ENERGY dashboard.   
     battery_discharged_energy:
-      name: "kWh Discharged Total"
+      name: "Battery Discharging Power"   
+
+
+logger:
+  level: ERROR
+  baud_rate: 0 #in this example we use UART that is also used by the logger. We dont need serial logger so we just disable it here
 ```
 
 Not all sensors need to be added.
 Address is assumed to be 1 if not provided. (this is configured on the monitor)
 invert_current: This inverts the reported current, it's recommended to include this option with either true or false (which ever makes the current make more sense for your setup). The default is currently false (and false will match previous behaviour), but may change to true in future updates.
-## Future work
-More sensors/statistics are possible, as is adjusting various configuration, but haven't currently been added. File an issue if there anything you want to see.
+
