@@ -91,7 +91,7 @@ void JuncTekKGF::handle_settings(const char* buffer)
 
 void JuncTekKGF::handle_status(const char* buffer)
 {
-  ESP_LOGD("JunkTekKGF", "Status %s", buffer);
+  ESP_LOGV("JunkTekKGF", "Status %s", buffer);
   const char* cursor = buffer;
   const int address = getval(cursor); //0
   if (address != this->address_)
@@ -114,7 +114,9 @@ void JuncTekKGF::handle_status(const char* buffer)
   const int outputStatus = getval(cursor); //10
   const int direction = getval(cursor); //11
   const int batteryLifeMinutes = getval(cursor); //12
-  const float batteryInternalOhms = getval(cursor) / 100000.000; //13, Ohms
+
+  getval(cursor); //13
+  const float batteryInternalOhms = getval(cursor) / 100000.000; //14, Ohms
 
   ESP_LOGV("JunkTekKGF", "Recv %f %f %d %f %f %f", voltage, ampHourRemaining, direction, powerInWatts, amps, temperature);
 
