@@ -47,10 +47,7 @@ from esphome.const import (
 )
 
 UNIT_AMPER_HOURS = 'Ah'
-
-
 DEPENDENCIES = ["uart"]
-
 AUTO_LOAD = ["sensor"]
 
 # sensors
@@ -61,7 +58,9 @@ CONF_BATTERY_DISCHARGED_ENERGY = 'battery_discharged_energy'
 CONF_BATTERY_LIFE = 'battery_life'
 CONF_BATTERY_POWER = 'battery_power'
 CONF_AMP_HOUR_REMAIN = "amp_hour_remain"
-CONF_RELAY_STATUS = "relay_status"
+CONF_AMP_HOUR_USED = "amp_hour_used_total"
+CONF_AMP_HOUR_CHARGED = "amp_hour_charged_total"
+CONF_OUTPUT_STATUS = "output_status"
 CONF_POWER = "power"
 
 TYPES = [
@@ -75,8 +74,10 @@ TYPES = [
     CONF_BATTERY_CHARGED_ENERGY,
     CONF_BATTERY_DISCHARGED_ENERGY,
     CONF_AMP_HOUR_REMAIN,
+    CONF_AMP_HOUR_USED,
+    CONF_AMP_HOUR_CHARGED,
     CONF_BATTERY_OHM,
-    CONF_RELAY_STATUS,
+    CONF_OUTPUT_STATUS,
     CONF_POWER
 ]
 
@@ -96,28 +97,28 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_VOLTAGE): sensor.sensor_schema(
                 unit_of_measurement=UNIT_VOLT,
                 icon=ICON_FLASH,
-                accuracy_decimals=1,
+                accuracy_decimals=2,
                 device_class=DEVICE_CLASS_VOLTAGE,
-                state_class=STATE_CLASS_MEASUREMENT,
+                state_class=STATE_CLASS_MEASUREMENT                
             ),
             cv.Optional(CONF_CURRENT): sensor.sensor_schema(
                 unit_of_measurement=UNIT_AMPERE,
                 icon="mdi:current-dc",
-                accuracy_decimals=1,
+                accuracy_decimals=2,
                 device_class=DEVICE_CLASS_CURRENT,
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
             cv.Optional(CONF_BATTERY_LEVEL): sensor.sensor_schema(
                 unit_of_measurement=UNIT_PERCENT,
                 icon=ICON_PERCENT,
-                accuracy_decimals=1,
+                accuracy_decimals=2,
                 device_class=DEVICE_CLASS_BATTERY,
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
             cv.Optional(CONF_BATTERY_OHM): sensor.sensor_schema(
                 unit_of_measurement=UNIT_OHM,
                 icon="mdi:resistor",
-                accuracy_decimals=2,
+                accuracy_decimals=3,
                 device_class=DEVICE_CLASS_BATTERY,
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
@@ -131,43 +132,61 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_DIRECTION): sensor.sensor_schema(
                 accuracy_decimals=0,
             ),
-            cv.Optional(CONF_RELAY_STATUS): sensor.sensor_schema(
+            cv.Optional(CONF_OUTPUT_STATUS): sensor.sensor_schema(
+                accuracy_decimals=0,
+                icon="mdi:list-status"
             ),
             cv.Optional(CONF_POWER): sensor.sensor_schema(
                 unit_of_measurement=UNIT_WATT,
                 icon=ICON_POWER,
-                accuracy_decimals=0,
+                accuracy_decimals=2,
                 device_class=DEVICE_CLASS_POWER,
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
-            # cv.Optional(CONF_BATTERY_LIFE): sensor.sensor_schema(
-            #     unit_of_measurement=UNIT_MINUTE,
-            #     icon=ICON_TIMER,
-            #     accuracy_decimals=2,
-            #     device_class=DEVICE_CLASS_DURATION,
-            #     state_class=STATE_CLASS_MEASUREMENT,
-            # ),
+            cv.Optional(CONF_BATTERY_LIFE): sensor.sensor_schema(
+                unit_of_measurement=UNIT_MINUTE,
+                icon=ICON_TIMER,
+                accuracy_decimals=0,
+                device_class=DEVICE_CLASS_DURATION,
+                state_class=STATE_CLASS_MEASUREMENT,
+             ),
             cv.Optional(CONF_BATTERY_CHARGED_ENERGY): sensor.sensor_schema(
-                unit_of_measurement=UNIT_KILOWATT_HOURS,
+                unit_of_measurement=UNIT_WATT,
                 icon="mdi:lightning-bolt",
                 accuracy_decimals=2,
-                device_class=DEVICE_CLASS_ENERGY,
+                device_class=DEVICE_CLASS_POWER,
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
             cv.Optional(CONF_BATTERY_DISCHARGED_ENERGY): sensor.sensor_schema(
-                unit_of_measurement=UNIT_KILOWATT_HOURS,
+                unit_of_measurement=UNIT_WATT,
                 icon="mdi:lightning-bolt",
                 accuracy_decimals=2,
-                device_class=DEVICE_CLASS_ENERGY,
+                device_class=DEVICE_CLASS_POWER,
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
             cv.Optional(CONF_AMP_HOUR_REMAIN): sensor.sensor_schema(
                 unit_of_measurement=UNIT_AMPER_HOURS,
                 icon=ICON_BATTERY,
-                accuracy_decimals=0,
+                accuracy_decimals=1,
                 device_class=DEVICE_CLASS_BATTERY,
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
+
+            cv.Optional(CONF_AMP_HOUR_USED): sensor.sensor_schema(
+                unit_of_measurement=UNIT_AMPER_HOURS,
+                icon=ICON_BATTERY,
+                accuracy_decimals=1,
+                device_class=DEVICE_CLASS_BATTERY,
+                state_class=STATE_CLASS_MEASUREMENT,
+            ),
+            cv.Optional(CONF_AMP_HOUR_CHARGED): sensor.sensor_schema(
+                unit_of_measurement=UNIT_AMPER_HOURS,
+                icon=ICON_BATTERY,
+                accuracy_decimals=1,
+                device_class=DEVICE_CLASS_BATTERY,
+                state_class=STATE_CLASS_MEASUREMENT,
+            ),
+
             cv.Optional(CONF_INVERT_CURRENT, default=False): cv.boolean,
             cv.Optional(CONF_UPDATE_SETTINGS_INTERVAL, default=30000): cv.int_,
             cv.Optional(CONF_UPDATE_STATS_INTERVAL, default=1000): cv.int_,

@@ -1,12 +1,8 @@
 #include "junctek_kgf.h"
-
 #include "esphome/core/log.h"
 #include "esphome/core/optional.h"
-
-
 #include <string>
 #include <string.h>
-
 #include <setjmp.h>
 
 static jmp_buf parsing_failed;
@@ -47,6 +43,8 @@ JuncTekKGF::JuncTekKGF(unsigned address, bool invert_current)
   : address_(address)
   , invert_current_(invert_current)
 {
+
+  
 }
 
 void JuncTekKGF::dump_config()
@@ -63,9 +61,12 @@ void JuncTekKGF::handle_settings(const char* buffer)
   ESP_LOGD("JunkTekKGF", "Settings %s", buffer);
   const char* cursor = buffer;
   const int address = getval(cursor);
+
   if (address != this->address_)
     return;
+
   const int checksum = getval(cursor);
+  
   if (! verify_checksum(checksum, cursor))
     return;
 
@@ -84,42 +85,39 @@ void JuncTekKGF::handle_settings(const char* buffer)
   const int reserved = getval(cursor);
   const int relayNormallyOpen = getval(cursor);
   const int currentratio = getval(cursor);
-  // NOTE these are in the docs, but I don't seem to get them
-  //const int voltageCurveScale = getval(cursor);
-  //const int currentCurveScale = getval(cursor);
 
   // Save the capacity for calculating the %
   this->battery_capacity_ = batteryAmpHourCapacity;
-
   this->last_settings_ = esphome::millis();
+  this->last_stats_  = this->last_settings_;
 }
 
 void JuncTekKGF::handle_status(const char* buffer)
 {
-  ESP_LOGD("JunkTekKGF", "Status %s", buffer);
+  ESP_LOGV("JunkTekKGF", "Status %s", buffer);
   const char* cursor = buffer;
-  const int address = getval(cursor);
+  const int address = getval(cursor); //0
   if (address != this->address_)
     return;
  
-  const int checksum = getval(cursor);
+  const int checksum = getval(cursor); //1
   if (! verify_checksum(checksum, cursor))
     return;
 
-  const float voltage = getval(cursor) / 100.0;
-  const float amps = getval(cursor) / 100.0;
-  const float ampHourRemaining = getval(cursor) / 1000.0;
-  const float ampHourTotalUsed = getval(cursor) / 1000.00;
-  const float wattHour = getval(cursor) / 100.0;
-  const float runtimeSeconds = getval(cursor);
-  const float temperature = getval(cursor) - 100.0;
-//todo - my unit always returns 0; from manual: 0 means the function is pending
-  const float powerInWatts = getval(cursor) / 100.0;
-  const int relayStatus = getval(cursor);
-  const int direction = getval(cursor);
-  const int batteryLifeMinutes = getval(cursor);
-  const float batteryInternalOhms = getval(cursor) / 100.0;
-  ESP_LOGV("JunkTekKGF", "Recv %f %f %d %f %f %f", voltage, ampHourRemaining, direction, powerInWatts, amps, temperature);
+  const float voltage = getval(cursor) / 100.00; //2
+  const float amps = getval(cursor) / 100.00; //3
+
+  const float ampHourRemaining = getval(cursor) / 1000.0; //4
+  const float ampHourTotalUsed = getval(cursor) / 1000.0; //5
+  const float ampHourTotalCharged = getval(cursor) / 1000.0; //6
+
+  const float runtimeSeconds = getval(cursor); //7
+  const float temperature = getval(cursor) - 100.0; //8
+  const float powerInWatts = getval(cursor) / 100.00; //9
+  const int outputStatus = getval(cursor); //10
+  const int direction = getval(cursor); //11
+  const int batteryLifeMinutes = getval(cursor); //12
+  const float batteryInternalOhms = getval(cursor) / 100000.000; //13, Ohms
 
   if (voltage_sensor_)
     this->voltage_sensor_->publish_state(voltage);
@@ -143,8 +141,14 @@ void JuncTekKGF::handle_status(const char* buffer)
   if (amp_hour_remain_sensor_)
     this->amp_hour_remain_sensor_->publish_state(ampHourRemaining);
 
-  if (relay_status_sensor_)
-    this->relay_status_sensor_->publish_state(relayStatus == 0);
+  if (amp_hour_used_sensor_)
+  this->amp_hour_used_sensor_->publish_state(ampHourTotalUsed);
+
+  if (amp_hour_charged_sensor_)
+  this->amp_hour_charged_sensor_->publish_state(ampHourTotalCharged);
+
+  if (output_status_sensor_)
+    this->output_status_sensor_->publish_state(outputStatus);
 
   if (temperature_)
     this->temperature_->publish_state(temperature);
@@ -158,18 +162,39 @@ void JuncTekKGF::handle_status(const char* buffer)
   }
 
   if (battery_charged_energy_sensor_) {
-    this->battery_charged_energy_sensor_->publish_state(wattHour / 1000);
+
+    float adjustedCurrent = direction == 0 ? amps : -amps;
+    if (invert_current_)
+      adjustedCurrent *= -1;
+    float watts = voltage * adjustedCurrent;
+
+    //we only care about amps that came into battery
+    if(direction == 1)
+      this->battery_charged_energy_sensor_->publish_state(watts);
+    else
+      this->battery_charged_energy_sensor_->publish_state(0);
   }
+
 
   if (battery_discharged_energy_sensor_) {
-    float dischargedEnergy = ampHourTotalUsed * (3.2 * 18) / 1000;  // Nominal voltange on cell * count off cell;
-    this->battery_discharged_energy_sensor_->publish_state(dischargedEnergy);
-  }
-  //  if (battery_life_sensor_)
-    //    this->battery_life_sensor_->publish_state(batteryLifeMinutes);
 
-  //  if (runtime_sensor_)
-  //    this->runtime_sensor_->publish_state(runtimeSeconds);
+    float adjustedCurrent = direction == 0 ? amps : -amps;
+    if (invert_current_)
+      adjustedCurrent *= -1;
+    float watts = voltage * adjustedCurrent;
+
+    //we only care about amps that came from battery
+    if(direction == 0)
+      this->battery_discharged_energy_sensor_->publish_state(watts);
+    else
+      this->battery_discharged_energy_sensor_->publish_state(0);
+  }
+
+  if (battery_life_sensor_)
+      this->battery_life_sensor_->publish_state(batteryLifeMinutes);
+
+  if (runtime_sensor_)
+    this->runtime_sensor_->publish_state(runtimeSeconds);
 
   this->last_stats_ = esphome::millis();
 }
@@ -235,7 +260,7 @@ bool JuncTekKGF::verify_checksum(int checksum, const char* buffer)
 
 void JuncTekKGF::loop()
 {
-//todo not needed. uncomment if you do not receive any data
+//todo not needed. uncomment if you do not receive any data, or dont use monitor, or monitor data refresh is turned of
 
 //  const unsigned long start_time = esphome::millis();
 //
@@ -255,9 +280,14 @@ void JuncTekKGF::loop()
 //    write_str(buffer);
 //  }
 
-  if (readline())
+  const unsigned long start_time = esphome::millis();
+ 
+  if (!this->last_stats_ || ((*this->last_stats_ + this->update_stats_interval_) < start_time))
   {
-    handle_line();
+    if (readline())
+    {      
+      handle_line();
+    }
   }
 }
 
