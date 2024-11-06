@@ -61,9 +61,12 @@ void JuncTekKGF::handle_settings(const char* buffer)
   ESP_LOGD("JunkTekKGF", "Settings %s", buffer);
   const char* cursor = buffer;
   const int address = getval(cursor);
+
   if (address != this->address_)
     return;
+
   const int checksum = getval(cursor);
+  
   if (! verify_checksum(checksum, cursor))
     return;
 
@@ -91,68 +94,42 @@ void JuncTekKGF::handle_settings(const char* buffer)
 
 void JuncTekKGF::handle_status(const char* buffer)
 {
-  ESP_LOGE("JunkTekKGF", "Status %s", buffer);
+  ESP_LOGV("JunkTekKGF", "Status %s", buffer);
   const char* cursor = buffer;
   const int address = getval(cursor); //0
   if (address != this->address_)
     return;
  
- ESP_LOGE("JunkTekKGF", "0 %s", cursor);
-
   const int checksum = getval(cursor); //1
-   ESP_LOGE("JunkTekKGF", "1 %s", cursor);
-
   if (! verify_checksum(checksum, cursor))
     return;
 
   const float voltage = getval(cursor) / 100.00; //2
-   ESP_LOGE("JunkTekKGF", "2 %s", cursor);
-
   const float amps = getval(cursor) / 100.00; //3
-   ESP_LOGE("JunkTekKGF", "3 %s", cursor);
 
   const float ampHourRemaining = getval(cursor) / 1000.0; //4
-   ESP_LOGE("JunkTekKGF", "4 %s", cursor);
-
   const float ampHourTotalUsed = getval(cursor) / 1000.0; //5
-   ESP_LOGE("JunkTekKGF", "5 %s", cursor);
-
   const float ampHourTotalCharged = getval(cursor) / 1000.0; //6
-   ESP_LOGE("JunkTekKGF", "6 %s", cursor);
 
   const float runtimeSeconds = getval(cursor); //7
-   ESP_LOGE("JunkTekKGF", "7 %s", cursor);
-
   const float temperature = getval(cursor) - 100.0; //8
-   ESP_LOGE("JunkTekKGF", "8 %s", cursor);
-
   const float powerInWatts = getval(cursor) / 100.00; //9
-   ESP_LOGE("JunkTekKGF", "9 %s", cursor);
-
   const int outputStatus = getval(cursor); //10
-   ESP_LOGE("JunkTekKGF", "10 %s", cursor);
-
-
   const int direction = getval(cursor); //11
-   ESP_LOGE("JunkTekKGF", "11 %s", cursor);
-
   const int batteryLifeMinutes = getval(cursor); //12
-   ESP_LOGE("JunkTekKGF", "12 %s", cursor);
-
-
   const float batteryInternalOhms = getval(cursor) / 100000.000; //13, Ohms
-   ESP_LOGE("JunkTekKGF", "13 %s", cursor);
-
-  const float batteryInternalOhms2 = getval(cursor) / 100000.000; //13, Ohms
-  ESP_LOGE("JunkTekKGF", "14 %s", cursor);
-
-  ESP_LOGV("JunkTekKGF", "Recv %f %f %d %f %f %f", voltage, ampHourRemaining, direction, powerInWatts, amps, temperature);
 
   if (voltage_sensor_)
     this->voltage_sensor_->publish_state(voltage);
 
   if (battery_level_sensor_ && this->battery_capacity_)
-    this->battery_level_sensor_->publish_state(ampHourRemaining * 100.0 / *this->battery_capacity_);
+  {
+    float battLvl = ampHourRemaining * 100.0 / * this->battery_capacity_;
+
+    //prevent from publishing crazy numbers.
+    if(battLvl < 100 && battLvl > 0)
+      this->battery_level_sensor_->publish_state(battLvl);
+  }
 
   if (current_sensor_) {
     float adjustedCurrent = direction == 0 ? amps : -amps;
