@@ -80,8 +80,7 @@ sensor:
     temperature:
       name: "Temperature"
 
-    # usless sensor, unless you use lead-acid battery.  But i never tested is it really measures resistance or not.
-    # In case of LiFePo4 it always returns 1mOhm which seems to be corret cause LiFePo4 resistance is less that 1mOhm.
+    # usless sensor, seems not to work and always returns 1 mili ohm.
     battery_ohm:
       name: "Battery Resistance"
     
