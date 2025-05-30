@@ -173,15 +173,15 @@ CONFIG_SCHEMA = cv.All(
             ),
 
             cv.Optional(CONF_AMP_HOUR_USED): sensor.sensor_schema(
-                unit_of_measurement=UNIT_AMPER_HOURS,
-                icon=ICON_BATTERY,
+                unit_of_measurement=UNIT_KILOWATT_HOURS,
+                icon="mdi:lightning-bolt",
                 accuracy_decimals=1,
                 device_class=DEVICE_CLASS_BATTERY,
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
             cv.Optional(CONF_AMP_HOUR_CHARGED): sensor.sensor_schema(
-                unit_of_measurement=UNIT_AMPER_HOURS,
-                icon=ICON_BATTERY,
+                unit_of_measurement=UNIT_KILOWATT_HOURS,
+                icon="mdi:lightning-bolt",
                 accuracy_decimals=1,
                 device_class=DEVICE_CLASS_BATTERY,
                 state_class=STATE_CLASS_MEASUREMENT,
