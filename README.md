@@ -1,5 +1,5 @@
-# esphome-junctek_kgf
-Component for esphome to read status from a Junctek KG-F coulometer/battery monitor via UART. It also reads settings so it is able correctly calculate battery percentage left. But settings are not exposed to HomeAssistant.
+# esphome-junctek_khf
+Component for esphome to read status from a Junctek KH-F battery monitor via UART. It also reads settings so it is able correctly calculate battery percentage left. But settings are not exposed to HomeAssistant.
 
 ## Features
 Connects to the Junctek KGF series battery monitor via UART (RS-485 *adapter NOT needed*) and retrieves the following values:
@@ -9,13 +9,10 @@ Connects to the Junctek KGF series battery monitor via UART (RS-485 *adapter NOT
 * Battery Current
 * Power
 * Temperature
-* Battery Ah Charged Total
 * Battery Ah Remaining
-* Battery Ah Used Total
-* Battery Charging Power
-* Battery Discharging Power
+* Battery Charging Energy
+* Battery Discharging Energy
 * Battery life remaining
-* Battery Resistance
 * Output Status
 
 ## Requirements
@@ -26,7 +23,7 @@ Connects to the Junctek KGF series battery monitor via UART (RS-485 *adapter NOT
 
 ## Usage
 ### Connect hardware.
-The ESP32 TX and RX needs to be connected via Junctek LINK port using a 4cp4 connector. Monitor SHOULD BE connected too and active. If you dont have monitor you should edit component loop method and uncomment old code, and comment out new one. Monitor makes calls to Junctek asking for data, ESP32 just reads the response and parses it. So you keep the monitor + will have data comming to your IoT system.
+The ESP32 TX and RX needs to be connected to RS-485 Link port directly (RX to A, TX to B without UART-to-RS485 converter). Monitor SHOULD BE connected too and active. Monitor makes calls to Junctek asking for data, ESP just reads the response and parses it. So you keep the monitor + will have data comming to your IoT system.
 
 ## ESPHOME Config
 The applicable config for the device should look something like:
