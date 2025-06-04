@@ -29,8 +29,34 @@ The ESP32 TX and RX needs to be connected to RS-485 Link port directly (RX to A,
 The applicable config for the device should look something like:
 
 ```yaml
+substitutions:
+  name: "kh-f-battery-monitor"
+  friendly_name: "KH-F Battery Monitor"
+
+esp8266:
+  board: esp01_1m
+
+esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  name_add_mac_suffix: true
+
+  project:
+    name: esphome.kh-f-battery-monitor
+    version: "1.0"
+
 logger:
-  baud_rate: 0
+
+api:
+
+ota:
+  platform: esphome
+
+wifi:
+  ap:
+    password: "12345678"
+
+captive_portal:
 
 external_components:
   - source:
@@ -51,23 +77,23 @@ sensor:
     invert_current: true
     update_stats_interval: 3000 #3 seconds
     voltage:
-      name: "Voltage"
+      name: "Battery Voltage"
     current:
-      name: "Current"
+      name: "Battery Current"
     power:
-      name: "Power"
+      name: "Battery Power"
     battery_level:
-      name: "Volume"
+      name: "Battery Level"
     amp_hour_remain:
-      name: "Remaining capacity"
+      name: "Remaining Capacity"
     amp_hour_used_total:
-      name: "Discharge energy"
+      name: "Discharge Energy"
     amp_hour_charged_total:
-      name: "Charge energy"
+      name: "Charge Energy"            
     temperature:
       name: "Temperature"
     output_status:
-      name: "Status"
+      name: "Battery Status"
     battery_life:
       name: "Remaining time"
 ```
