@@ -1,32 +1,37 @@
 # esphome-junctek_khf
-Component for esphome to read status from a Junctek KH-F battery monitor via UART. It also reads settings so it is able correctly calculate battery percentage left. But settings are not exposed to HomeAssistant.
+Компонент для интеграции в Home Assistant монитора аккумуляторной батареи Junctek KH-F с помощью ESPHome.
 
-## Features
-Connects to the Junctek KGF series battery monitor via UART (RS-485 *adapter NOT needed*) and retrieves the following values:
+## Возможности
+Подключение к монитору Junctek KH-F через разъем "RS-485 Link" и отображение следующих значений:
 
-* Battery Voltage
-* Battery Percent
-* Battery Current
-* Power
-* Temperature
-* Battery Ah Remaining
-* Battery Charging Energy
-* Battery Discharging Energy
-* Battery life remaining
-* Output Status
+* Процент заряда АКБ (%)
+* Оставшаяся емкость батареи (Ah)
+* Оставшееся время работы (min)
+* Ток батареи (A)
+* Напряжение батареи (V)
+* Мощность батареи (W)
+* Мощность заряда АКБ (W) 
+* Мощность разряда АКБ (W)
+* Температура батареи
+* Статус АКБ
 
-## Requirements
-* ESPHome
+## Необходимое оборудование
+* NodeMCU v3.0 на базе ESP8266 (или другая платформа, поддерживаемая в ESPHome)
+* монитор аккумуляторной батареи Junctek KH-F с дисплеем
 
-## Known problems
-* If could call it a problem - when data not available from Junctek interface - you keep seeing the latest value in sensors. Which may misslead. Sensors will not be updated nor they be set to Unavailable.
+## Особенности
+* Дисплей монитора Junctek KH-F должен быть подключен и активен (т.к. дисплей отправляет запросы в измерительный модуль, а устройство на базе ESPHome только считывает полученные в ответ данные, таким образом обеспечивается одновременная работа дисплея и передача данных в Home Assistant).
 
-## Usage
-### Connect hardware.
-The ESP32 TX and RX needs to be connected to RS-485 Link port directly (RX to A, TX to B without UART-to-RS485 converter). Monitor SHOULD BE connected too and active. Monitor makes calls to Junctek asking for data, ESP just reads the response and parses it. So you keep the monitor + will have data comming to your IoT system.
+## Подключение
+Подключить пин "TX" (D0, GPIO16) платы Node MCU к выводу "В" разъема RS-485 Link измерительного модуля Junctek KH-F.
+Подключить пин "RX" (D1, GPIO5) платы Node MCU к выводу "A" разъема RS-485 Link измерительного модуля Junctek KH-F.
+Подключить пин "G" (GND) платы Node MCU к выводу "GND" разъема RS-485 Link измерительного модуля Junctek KH-F.
+Подключить питание +5В на плату Node MCU через разъем USB или на выводы VIN и GND.
 
-## ESPHOME Config
-The applicable config for the device should look something like:
+## Настройка
+- установить интеграцию ESPHome Builder в Home Assistant
+- создать новое устройство
+- отредактировать конфигурационный файл устройства в соответствии:
 
 ```yaml
 esphome:
@@ -99,7 +104,4 @@ sensor:
       name: "Battery discharge power"
 ```
 
-Not all sensors need to be added.
-Address is assumed to be 1 if not provided. (this is configured on the monitor)
-invert_current: This inverts the reported current, it's recommended to include this option with either true or false (which ever makes the current make more sense for your setup). The default is currently false (and false will match previous behaviour), but may change to true in future updates.
 
