@@ -29,32 +29,33 @@ The ESP32 TX and RX needs to be connected to RS-485 Link port directly (RX to A,
 The applicable config for the device should look something like:
 
 ```yaml
-substitutions:
-  name: "kh-f-battery-monitor"
-  friendly_name: "KH-F Battery Monitor"
+esphome:
+  name: kh-f-battery-monitor
+  friendly_name: KH-F Battery Monitor
 
 esp8266:
   board: esp01_1m
 
-esphome:
-  name: "${name}"
-  friendly_name: "${friendly_name}"
-  name_add_mac_suffix: true
-
-  project:
-    name: esphome.kh-f-battery-monitor
-    version: "1.0"
-
+# Enable logging
 logger:
 
+# Enable Home Assistant API
 api:
+  encryption:
+    key: "*"
 
 ota:
-  platform: esphome
+  - platform: esphome
+    password: "*"
 
 wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
-    password: "12345678"
+    ssid: "Kh-F-Battery-Monitor"
+    password: "*"
 
 captive_portal:
 
@@ -67,35 +68,35 @@ external_components:
     refresh: 0s
 
 uart:
-  tx_pin: TX #26
-  rx_pin: RX #27
+  tx_pin: GPIO16
+  rx_pin: GPIO5
   baud_rate: 115200
 
 sensor:
   - platform: junctek_kgf
     address: 1
     invert_current: true
-    update_stats_interval: 3000 #3 seconds
+    update_stats_interval: 1000 #1 seconds
     voltage:
-      name: "Battery Voltage"
+      name: "Battery voltage"
     current:
-      name: "Battery Current"
+      name: "Battery current"
     power:
-      name: "Battery Power"
+      name: "Battery power"
     battery_level:
-      name: "Battery Level"
+      name: "Battery level"
     amp_hour_remain:
-      name: "Remaining Capacity"
-    amp_hour_used_total:
-      name: "Discharge Energy"
-    amp_hour_charged_total:
-      name: "Charge Energy"            
+      name: "Battery remaining capacity"           
     temperature:
-      name: "Temperature"
+      name: "Battery temperature"
     output_status:
-      name: "Battery Status"
+      name: "Battery status"
     battery_life:
-      name: "Remaining time"
+      name: "Battery remaining time"
+    battery_charged_energy:
+      name: "Battery charge power"
+    battery_discharged_energy:
+      name: "Battery discharge power"
 ```
 
 Not all sensors need to be added.
