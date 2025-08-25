@@ -187,7 +187,7 @@ void JuncTekKGF::handle_status(const char* buffer)
     float adjustedCurrent = direction == 0 ? amps : -amps;
     if (invert_current_)
       adjustedCurrent *= -1;
-    float watts = voltage * adjustedCurrent;
+    float watts = voltage * adjustedCurrent * -1;
 
     //we only care about amps that came from battery
     if(direction == 0)
