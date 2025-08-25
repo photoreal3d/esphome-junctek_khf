@@ -184,10 +184,10 @@ void JuncTekKGF::handle_status(const char* buffer)
 
   if (battery_discharged_energy_sensor_) {
 
-    float adjustedCurrent = direction == 0 ? amps : -amps;
+    float adjustedCurrent = direction == 1 ? amps : -amps;
     if (invert_current_)
       adjustedCurrent *= -1;
-    float watts = voltage * (0 - adjustedCurrent);
+    float watts = voltage * adjustedCurrent;
 
     //we only care about amps that came from battery
     if(direction == 0)
